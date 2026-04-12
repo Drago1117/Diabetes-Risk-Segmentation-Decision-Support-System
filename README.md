@@ -1,4 +1,4 @@
-## 🔍 Patient Segmentation & Key Drivers (Person 4)
+## 🔍 Patient Segmentation & Key Drivers
 
 - Applied K-Means clustering (k=3) to segment patients into risk groups  
 - Identified high-risk clusters with elevated glucose and HbA1c levels  
