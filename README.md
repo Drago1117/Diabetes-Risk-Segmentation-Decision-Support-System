@@ -1,1 +1,0 @@
-# Diabetes-Risk-Segmentation-Decision-Support-System
