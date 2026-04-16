@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, State, callback
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import dash_table
@@ -22,15 +22,33 @@ app.layout = html.Div([
         dcc.Tab(label='Patient Risk Prediction', children=[
             html.Div([
                 html.H3("Patient Input Form", style={'textAlign': 'center', 'marginBottom': '30px'}),
-                dcc.Input(id='age', type='number', value=45, placeholder="Age", className="form-control mb-3", style={'width': '200px'}),
-                dcc.Dropdown(id='gender', options=[{'label': 'Male', 'value': 0}, {'label': 'Female', 'value': 1}], value=1, className="form-control mb-3", style={'width': '200px'}),
-                dcc.Input(id='bmi', type='number', value=29.3, placeholder="BMI", className="form-control mb-3", style={'width': '200px'}),
-                dcc.Dropdown(id='physical_activity', options=[{'label': 'High', 'value': 'High'}, {'label': 'Medium', 'value': 'Medium'}, {'label': 'Low', 'value': 'Low'}], value='High', className="form-control mb-3", style={'width': '200px'}),
-                dcc.Slider(id='diet_score', min=0, max=10, step=0.5, value=7.0, marks={i: str(i) for i in [0,2,4,6,8,10]}, className="mb-3"),
-                dcc.Slider(id='sleep_hours_per_day', min=0, max=12, step=0.5, value=7, marks={i: str(i) for i in [0,4,8,12]}, className="mb-4"),
-                html.Button('🔮 Predict Risk & Segment', id='predict-btn', n_clicks=0, className="btn btn-primary btn-lg mb-4"),
+                html.Div([
+                    html.Label("Age:", style={'fontWeight': 'bold', 'marginBottom': '5px', 'display': 'block'}),
+                    dcc.Input(id='age', type='number', placeholder="Enter age (years)", style={'width': '100%'})
+                ], style={'marginBottom': '20px', 'width': '100%'}),
+                html.Div([
+                    html.Label("Gender:", style={'fontWeight': 'bold', 'marginBottom': '5px', 'display': 'block'}),
+                    dcc.Dropdown(id='gender', options=[{'label': 'Male', 'value': 0}, {'label': 'Female', 'value': 1}], style={'width': '100%'})
+                ], style={'marginBottom': '20px', 'width': '100%'}),
+                html.Div([
+                    html.Label("BMI:", style={'fontWeight': 'bold', 'marginBottom': '5px', 'display': 'block'}),
+                    dcc.Input(id='bmi', type='number', placeholder="Enter BMI", step="0.1", style={'width': '100%'})
+                ], style={'marginBottom': '20px', 'width': '100%'}),
+                html.Div([
+                    html.Label("Physical Activity:", style={'fontWeight': 'bold', 'marginBottom': '5px', 'display': 'block'}),
+                    dcc.Dropdown(id='physical_activity', options=[{'label': 'High', 'value': 'High'}, {'label': 'Medium', 'value': 'Medium'}, {'label': 'Low', 'value': 'Low'}], style={'width': '100%'})
+                ], style={'marginBottom': '20px', 'width': '100%'}),
+                html.Div([
+                    html.Label("Diet Score (0-10):", style={'fontWeight': 'bold', 'marginBottom': '5px', 'display': 'block'}),
+                    dcc.Slider(id='diet_score', min=0, max=10, step=0.5, marks={i: str(i) for i in [0,2,4,6,8,10]})
+                ], style={'marginBottom': '20px', 'width': '100%'}),
+                html.Div([
+                    html.Label("Sleep Hours per Day (0-12):", style={'fontWeight': 'bold', 'marginBottom': '5px', 'display': 'block'}),
+                    dcc.Slider(id='sleep_hours_per_day', min=0, max=12, step=0.5, marks={i: str(i) for i in [0,4,8,12]})
+                ], style={'marginBottom': '20px', 'width': '100%'}),
+                html.Div(html.Button('🔮 Predict Risk & Segment', id='predict-btn', n_clicks=0, className="btn btn-primary btn-lg"), style={'alignSelf': 'center', 'marginBottom': '20px'}),
                 html.Div(id='prediction-output')
-            ], style={'maxWidth': '800px', 'margin': 'auto'})
+            ], style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'maxWidth': '500px', 'margin': 'auto'})
         ]),
         dcc.Tab(label='Model Insights', children=[
             html.Div([
@@ -69,13 +87,28 @@ app.layout = html.Div([
 ], style={'fontFamily': 'Arial, sans-serif', 'minHeight': '100vh'})
 
 @callback(
-    Output('prediction-output', 'children'),
+    [
+        Output('prediction-output', 'children'),
+        Output('age', 'value'),
+        Output('gender', 'value'),
+        Output('bmi', 'value'),
+        Output('physical_activity', 'value'),
+        Output('diet_score', 'value'),
+        Output('sleep_hours_per_day', 'value')
+    ],
     Input('predict-btn', 'n_clicks'),
-    [Input(comp, 'value') for comp in ['age', 'gender', 'bmi', 'physical_activity', 'diet_score', 'sleep_hours_per_day']]
+    [
+        State('age', 'value'),
+        State('gender', 'value'),
+        State('bmi', 'value'),
+        State('physical_activity', 'value'),
+        State('diet_score', 'value'),
+        State('sleep_hours_per_day', 'value')
+    ]
 )
 def update_prediction(n_clicks, age, gender, bmi, phys_act, diet_score, sleep_hours_per_day):
     if n_clicks == 0:
-        return ""
+        return "", None, None, None, None, None, None
     
     input_data = {
         'Age': age or 45,
@@ -112,8 +145,7 @@ def update_prediction(n_clicks, age, gender, bmi, phys_act, diet_score, sleep_ho
             html.P("Cluster 1: Medium - Monitor"),
             html.P("Cluster 2: High - Immediate Action ⚠️")
         ], style={'backgroundColor': '#fff3cd', 'padding': '20px', 'borderRadius': '10px'}),
-        html.Button('New Prediction', n_clicks=1)
-    ], style={'border': '2px solid #007bff', 'padding': '30px', 'borderRadius': '15px', 'boxShadow': '0 8px 16px rgba(0,0,0,0.1)'})
+    ], style={'border': '2px solid #007bff', 'padding': '30px', 'borderRadius': '15px', 'boxShadow': '0 8px 16px rgba(0,0,0,0.1)'}), None, None, None, None, None, None
 
 @callback(
     Output('data-table', 'children'),
