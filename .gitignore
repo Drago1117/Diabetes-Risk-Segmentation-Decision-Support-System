@@ -1,0 +1,16 @@
+venv/
+dashboard/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.DS_Store
+.ipynb_checkpoints/
+*.log
+dashboard/venv/
